@@ -190,7 +190,7 @@ function drawWalls() {
         walls[180] = new box(1404, 342, 5, 50), walls[181] = new box(1404, 692, 5, 50), walls[182] = new box(1404, 943, 5, 50), walls[183] = new box(1493, 190, 5, 100), walls[184] = new box(1493, 392, 5, 200), walls[185] = new box(1493, 638, 5, 50),
         walls[186] = new box(1493, 743, 5, 50), walls[187] = new box(1493, 893, 5, 50), walls[188] = new box(1583, 690, 5, 250), walls[189] = new box(1583, 88, 5, 100), walls[190] = new box(1583, 490, 5, 50), walls[191] = new box(1583, 590, 5, 50),
         walls[192] = new box(1672, 190, 5, 150), walls[193] = new box(1672, 792, 5, 100), walls[194] = new box(1672, 442, 5, 50), walls[195] = new box(1672, 538, 5, 50), walls[196] = new box(1672, 638, 5, 50), walls[197] = new box(1672, 945, 5, 50),
-        walls[198] = new box(1761, 189, 5, 50), walls[199] = new box(1761, 390, 5, 50), walls[200] = new box(1761, 590, 5, 50)
+        walls[198] = new box(1761, 189, 5, 50), walls[199] = new box(1761, 390, 5, 50), walls[200] = new box(1761, 590, 5, 50), walls[201] = new box(69, 0, 5, 40), walls[202] = new box(161, 0, 5, 40), walls[203] = new box(70, 0, 120, 5)
 }
 
 function start() {
@@ -203,9 +203,6 @@ function start() {
 
     player = new box(112, 40, 20, 20);
 
-    // enemy1 = new box(750, 150, 30, 30);
-    // enemy2 = new box(750, 250, 30, 30);
-
     hitbox = new box();
 
     treasure = new box(1785, 980, 120, 120);
@@ -214,6 +211,7 @@ function start() {
     paint();
     spawnEnemies();
     drawWalls();
+    bgm.play();
 }
 
 setInterval(timeCountdown, 1000);
@@ -401,6 +399,10 @@ function paint() {
     for (i = 0; i < walls.length; i++) {
         ctx.fillStyle = "rgb(6, 88, 24)";
         ctx.strokeStyle = "rgb(6, 88, 24)";
+        if (i > 200) {
+            ctx.fillStyle = "rgba(0,0,0,0)";
+            ctx.strokeStyle = "rgba(0,0,0,0)";
+        }
         walls[i].dibujar(ctx);
     }
 
@@ -412,8 +414,6 @@ function paint() {
 
     treasure.dibujar(ctx);
     ctx.drawImage(chest, 1785, 980, 120, 120)
-
-
 
     //collision box (debug)
     // ctx.strokeStyle = "black";
@@ -453,7 +453,7 @@ function paint() {
     if (!pause) {
         update();
     } else {
-        if (win){
+        if (win) {
             ctx.fillStyle = "rgba(0,0,50,0.5)"
             ctx.fillRect(0, 0, width, height);
 
@@ -481,13 +481,28 @@ function paint() {
                 game_over.pause();
             }
 
-        } else if(!dead && !win) {
+        } else if (!dead && !win) {
             ctx.fillStyle = "rgba(0,0,0,0.5)"
             ctx.fillRect(0, 0, width, height);
 
             ctx.font = "80px Arial";
             ctx.fillStyle = "white";
-            ctx.fillText("P A U S E", 790, 500);
+            ctx.fillText("P A U S E", 780, 350);
+
+            ctx.font = "40px Arial";
+            ctx.fillText("- Controles -", 850, 450);
+
+            ctx.font = "40px Arial";
+            ctx.fillText("Moverse - WASD", 810, 500);
+
+            ctx.font = "40px Arial";
+            ctx.fillText("Atacar - J", 810, 550);
+
+            ctx.font = "40px Arial";
+            ctx.fillText("Pausa - Espacio", 810, 600);
+
+            ctx.font = "40px Arial";
+            ctx.fillText("Reiniciar - R", 810, 650);
         }
 
     }
@@ -504,9 +519,9 @@ function paint() {
     }
 
     //contador
-    ctx.fillStyle = "black";
-    ctx.font = "30px Arial";
-    ctx.fillText(minutes + ":" + seconds, 50, 50);
+    ctx.fillStyle = "white";
+    ctx.font = "50px Arial";
+    ctx.fillText(minutes + ":" + seconds, 900, 70);
 }
 
 //player inputs
