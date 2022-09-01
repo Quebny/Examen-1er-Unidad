@@ -1,1 +1,5 @@
-# Examen-1er-Unidad
+****Controles****
+WASD    - Moverse
+J       - Atacar
+Espacio - Pausa
+R       - Reiniciar
