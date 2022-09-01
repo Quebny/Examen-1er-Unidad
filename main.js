@@ -211,7 +211,7 @@ function start() {
     paint();
     spawnEnemies();
     drawWalls();
-    bgm.play();
+    
 }
 
 setInterval(timeCountdown, 1000);
@@ -526,6 +526,7 @@ function paint() {
 
 //player inputs
 function update() {
+    bgm.play();
     en_animate(State.getState("enemy_move"));
 
     if (!attacking) { //detiene al jugador al atacar
