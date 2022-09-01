@@ -21,8 +21,9 @@ var direction = "right";
 var moving = false;
 var attacking = false;
 var dead = false;
+var win = false;
 
-var startTime = .05; //Minutes
+var startTime = 1.5; //Minutes
 var time = startTime * 60;
 var minutes = null;
 var seconds = null;
@@ -31,16 +32,28 @@ var seconds = null;
 var bg = new Image();
 bg.src = "sprites/background.png";
 
+var chest = new Image();
+chest.src = "sprites/chest.png";
+
 var playerSpriteSheet = new Image();
 playerSpriteSheet.src = "sprites/Player.png";
 
 var enemySpriteSheet = new Image();
 enemySpriteSheet.src = "sprites/Bat.png"
 
-//audio
+//music
 var bgm = new Audio('sound/bgm.mp3');
+bgm.currentTime = 1;
+var pause_music = new Audio('sound/pause_music.mp3');
+var game_over = new Audio('sound/gameover.mp3');
+var victory = new Audio('sound/victory.mp3');
+
+//sfx
 var hit = new Audio('sound/hit.wav');
 var swing = new Audio('sound/swing.wav');
+var pausesfx = new Audio('sound/pause.wav');
+var unpause = new Audio('sound/unpause.wav');
+var hurt = new Audio('sound/hurt.wav');
 
 //Entities
 var Entity = {
@@ -134,29 +147,16 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function load() {
-    bgm.play()
-}
-
-function start() {
-    cv = document.getElementById('mycanvas');
-    ctx = cv.getContext('2d')
-
-    cv.addEventListener('click', function (e) {
-        console.log("X: " + e.offsetX + " Y: " + e.offsetY);
-    });
-
-    player = new box(112, 40, 20, 20);
-
-    // enemy1 = new box(750, 150, 30, 30);
-    // enemy2 = new box(750, 250, 30, 30);
+function spawnEnemies() {
     enemies[0] = new box(105, 290, 30, 30), enemies[1] = new box(415, 200, 30, 30), enemies[2] = new box(790, 51, 30, 30), enemies[3] = new box(988, 210, 30, 30), enemies[4] = new box(1320, 150, 30, 30),
         enemies[5] = new box(1535, 59, 30, 30), enemies[6] = new box(1630, 350, 30, 30), enemies[7] = new box(1525, 1002, 30, 30), enemies[8] = new box(765, 352, 30, 30), enemies[9] = new box(760, 450, 30, 30),
         enemies[10] = new box(98, 505, 30, 30), enemies[11] = new box(480, 550, 30, 30), enemies[12] = new box(911, 458, 30, 30), enemies[13] = new box(535, 702, 30, 30), enemies[14] = new box(362, 735, 30, 30),
         enemies[15] = new box(100, 853, 30, 30), enemies[16] = new box(360, 930, 30, 30), enemies[17] = new box(520, 903, 30, 30), enemies[18] = new box(545, 1000, 30, 30), enemies[19] = new box(956, 1000, 30, 30),
         enemies[20] = new box(1320, 750, 30, 30), enemies[21] = new box(990, 555, 30, 30), enemies[22] = new box(1340, 452, 30, 30), enemies[23] = new box(1525, 510, 30, 30), enemies[24] = new box(1795, 585, 30, 30),
-        enemies[25] = new box(1440, 215, 30, 30)
+        enemies[25] = new box(1440, 215, 30, 30), enemies[26] = new box(1786, 745, 30, 30), enemies[27] = new box(1763, 1000, 30, 30)
+}
 
+function drawWalls() {
     walls[0] = new box(67, 37, 5, 1005), walls[1] = new box(73, 85, 80, 5), walls[2] = new box(159, 39, 1690, 5), walls[3] = new box(70, 1037, 1700, 5), walls[4] = new box(1848, 39, 5, 955), walls[5] = new box(243, 40, 5, 250),
         walls[6] = new box(67, 186, 85, 5), walls[7] = new box(156, 135, 92, 5), walls[8] = new box(152, 188, 5, 50), walls[9] = new box(157, 286, 180, 5), walls[10] = new box(331, 138, 5, 153), walls[11] = new box(335, 186, 272, 5),
         walls[12] = new box(422, 40, 5, 95), walls[13] = new box(336, 86, 91, 5), walls[14] = new box(510, 86, 632, 5), walls[15] = new box(1317, 86, 270, 5), walls[16] = new box(1676, 86, 171, 5), walls[17] = new box(1136, 336, 185, 5),
@@ -191,13 +191,29 @@ function start() {
         walls[186] = new box(1493, 743, 5, 50), walls[187] = new box(1493, 893, 5, 50), walls[188] = new box(1583, 690, 5, 250), walls[189] = new box(1583, 88, 5, 100), walls[190] = new box(1583, 490, 5, 50), walls[191] = new box(1583, 590, 5, 50),
         walls[192] = new box(1672, 190, 5, 150), walls[193] = new box(1672, 792, 5, 100), walls[194] = new box(1672, 442, 5, 50), walls[195] = new box(1672, 538, 5, 50), walls[196] = new box(1672, 638, 5, 50), walls[197] = new box(1672, 945, 5, 50),
         walls[198] = new box(1761, 189, 5, 50), walls[199] = new box(1761, 390, 5, 50), walls[200] = new box(1761, 590, 5, 50)
+}
 
+function start() {
+    cv = document.getElementById('mycanvas');
+    ctx = cv.getContext('2d')
+
+    cv.addEventListener('click', function (e) {
+        console.log("X: " + e.offsetX + " Y: " + e.offsetY);
+    });
+
+    player = new box(112, 40, 20, 20);
+
+    // enemy1 = new box(750, 150, 30, 30);
+    // enemy2 = new box(750, 250, 30, 30);
 
     hitbox = new box();
 
+    treasure = new box(1785, 980, 120, 120);
+
     timeCountdown();
     paint();
-    load();
+    spawnEnemies();
+    drawWalls();
 }
 
 setInterval(timeCountdown, 1000);
@@ -222,16 +238,55 @@ document.addEventListener('keydown', function (e) {
         }
     }
 
-    //atacar
-    if (move[74]) {
-        attacking = true;
-        swing.play()
+
+    if (!dead && !win) {
+        //atacar
+        if (move[74]) {
+            attacking = true;
+            swing.play()
+        }
+
+        //pause
+        if (e.keyCode == 32) {
+            pause = (pause) ? false : true;
+            if (pause) {
+                pausesfx.play();
+                bgm.pause();
+                pause_music.play();
+            } else {
+                unpause.play()
+                bgm.play();
+                pause_music.pause();
+                pause_music.currentTime = 0;
+            }
+        }
     }
 
-    //pause
-    if (e.keyCode == 32) {
-        pause = (pause) ? false : true;
+    //reiniciar
+    if (move[82]) {
+        for (i = 0; i < enemies.length; i++) {
+            enemies[i].x = -50;
+        }
+
+        player.x = 112, player.y = 40;
+        dead = false;
+        pause = false;
+
+        bgm.play();
+        bgm.currentTime = 1;
+        game_over.pause();
+        game_over.currentTime = 0;
+        pause_music.pause();
+        pause_music.currentTime = 0;
+        victory.pause();
+        victory.currentTime = 0;
+        time = 90;
+        win = false;
+
+        spawnEnemies();
+
     }
+
 });
 
 document.addEventListener('keyup', function (e) {
@@ -343,7 +398,6 @@ function paint() {
     // ctx.fillRect(0, 0, width, height);
     ctx.drawImage(bg, 0, 0, 1920, 1080)
 
-
     for (i = 0; i < walls.length; i++) {
         ctx.fillStyle = "rgb(6, 88, 24)";
         ctx.strokeStyle = "rgb(6, 88, 24)";
@@ -355,6 +409,11 @@ function paint() {
         ctx.strokeStyle = "rgba(0,0,0,0)";
         enemies[i].dibujar(ctx);
     }
+
+    treasure.dibujar(ctx);
+    ctx.drawImage(chest, 1785, 980, 120, 120)
+
+
 
     //collision box (debug)
     // ctx.strokeStyle = "black";
@@ -394,26 +453,53 @@ function paint() {
     if (!pause) {
         update();
     } else {
+        if (win){
+            ctx.fillStyle = "rgba(0,0,50,0.5)"
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.font = "80px Arial";
+            ctx.fillStyle = "white";
+            ctx.fillText("you win :)", 800, 500);
+
+            bgm.pause();
+            victory.play();
+        }
+
         if (dead) {
             ctx.fillStyle = "rgba(150,0,0,0.8)"
             ctx.fillRect(0, 0, width, height);
 
             ctx.fillStyle = "white";
-            ctx.fillText("G A M E  O V E R", 840, 500);
-        } else {
+            ctx.font = "80px Arial";
+            ctx.fillText("G A M E  O V E R", 620, 500);
+            ctx.font = "30px Arial";
+            ctx.fillText("Press 'R' to restart", 840, 570);
+            bgm.pause();
+            bgm.currentTime = 0;
+            game_over.play();
+            if (game_over.currentTime > 8) {
+                game_over.pause();
+            }
+
+        } else if(!dead && !win) {
             ctx.fillStyle = "rgba(0,0,0,0.5)"
             ctx.fillRect(0, 0, width, height);
 
+            ctx.font = "80px Arial";
             ctx.fillStyle = "white";
-            ctx.fillText("P A U S E", 850, 500);
+            ctx.fillText("P A U S E", 790, 500);
         }
-
 
     }
 
     //game over
-    if (time == -1) {
+    if (time == -1 || dead) {
         dead = true;
+        pause = true;
+    }
+
+    //winner
+    if (win) {
         pause = true;
     }
 
@@ -428,7 +514,7 @@ function update() {
     en_animate(State.getState("enemy_move"));
 
     if (!attacking) { //detiene al jugador al atacar
-
+        hitbox.x = -50, hitbox.y = -50;
         //derecha
         if (move[68]) {
             player.x += speed;
@@ -521,10 +607,16 @@ function update() {
         if (hitbox.collision(enemies, i)) {
             enemies[i].x = -50;
             hitbox.x = -50, hitbox.y = -50;
+            hit.play();
         }
         if (player.collision(enemies, i)) {
-
+            hurt.play();
+            dead = true;
         }
+    }
+
+    if (player.se_tocan(treasure)) {
+        win = true;
     }
 
 
